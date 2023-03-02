@@ -537,11 +537,11 @@ def monoimpulse():
 
 # Окно
 win = tk.Tk()
-win.geometry("900x700+400+70")
+win.geometry("1200x750+170+20")
 win.resizable(False, False)
-win.title("Laser Desktop")
+win.title("Laser Desktop_v2")
 
-image = tk.PhotoImage(file='icon.png')
+image = tk.PhotoImage(file='icon.ico')
 win.iconphoto(False, image)
 
 tk.Label(win, text="Программа для расчета ПДУ отраженного лазерного излучения",

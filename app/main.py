@@ -400,32 +400,6 @@ def impulse_calculation_eyes():
     eyes.insert(0, str(min(serial_impulse_eyes(), single_impulse_eyes()) / 0.4))
 
 
-# ********************************** МОНОИМПУЛЬСНЫЙ **********************************
-
-# ********************************** Кожа
-def monoimpulse_skin() -> None:
-    """Расчет ПДУ для кожи моноимп лазера и заполнение виджета ПДУ для кожи"""
-    length_of_wave = float(laser_lambda.get())
-    impulse_duration = float(laser_tay.get())
-    pdu_skin: float = table_6(length_of_wave, impulse_duration) / 10 * 1e-4
-    print(f"ПДУ для кожи моноимп = {pdu_skin}")
-    skin.insert(0, str(pdu_skin))
-
-
-# ********************************** Глаза
-
-def monoimpulse_eyes() -> None:
-    """Расчет ПДУ для глаз моноимп лазера и заполнение виджета ПДУ для глаз"""
-    length_of_wave = float(laser_lambda.get())
-    impulse_duration = float(laser_tay.get())
-    pdu_eyes: float = table_3(length_of_wave, impulse_duration)
-    print(f"B для глаз моноимп = {table_5(impulse_duration, alpha_calculation())}")
-    if table_5(impulse_duration, alpha_calculation()) != 1:
-        pdu_eyes *= impulse_duration
-    print(f"ПДУ для глаз моноимп = {pdu_eyes / 0.4}")
-    eyes.insert(0, str(pdu_eyes / 0.4))
-
-
 # ********************************** БОЛЕЕ 1,4 НЕПРЕРЫВНЫЙ **********************************
 
 def long_wave_continuous_calculation() -> None:
@@ -465,17 +439,6 @@ def long_wave_impulse_calculation():
     eyes.insert(0, str(min(long_wave_serial_impulse(), long_wave_single_impulse())))
 
 
-# ********************************** БОЛЕЕ 1,4 МОНОИМПУЛЬСНЫЙ **********************************
-
-def long_wave_monoimpulse_calculation() -> None:
-    length_of_wave = float(laser_lambda.get())
-    impulse_duration = float(laser_tay.get())
-    pdu: float = table_6(length_of_wave, impulse_duration) / 5 * 1e-4
-    print(f"ПДУ для кожи и глаз мноимп лазера большой длины волны = {pdu}")
-    skin.insert(0, str(pdu))
-    eyes.insert(0, str(pdu))
-
-
 # ********************************** MAIN **********************************
 def go():
     skin.delete(0, tk.END)
@@ -494,12 +457,6 @@ def go():
             impulse_calculation_eyes()
         else:
             crash()
-    elif work_mode == 3 and not long_wave_laser:
-        if all([lambda_verify(), diameter_verify(), impulse_duration_verify()]):
-            monoimpulse_skin()
-            monoimpulse_eyes()
-        else:
-            crash()
     elif work_mode == 1 and long_wave_laser:
         if all([lambda_verify(), time_verify(), diameter_verify(), long_wave_verify()]):
             long_wave_continuous_calculation()
@@ -509,11 +466,6 @@ def go():
         if all([lambda_verify(), time_verify(), diameter_verify(), impulse_duration_verify(), frequency_verify(),
                 long_wave_verify()]):
             long_wave_impulse_calculation()
-        else:
-            crash()
-    elif work_mode == 3 and long_wave_laser:
-        if all([lambda_verify(), diameter_verify(), impulse_duration_verify(), long_wave_verify()]):
-            long_wave_monoimpulse_calculation()
         else:
             crash()
 
@@ -527,12 +479,6 @@ def constant():
 
 def impulse():
     clear_all()
-
-
-def monoimpulse():
-    clear_all()
-    laser_t.insert(0, "---")
-    laser_f.insert(0, "---")
 
 
 # Окно
@@ -575,7 +521,6 @@ working_mode.grid(row=2, column=1, sticky="w")
 # RadioButtons
 tk.Radiobutton(win, text="Непрерывный", variable=mode, command=constant, value=1).grid(row=3, column=0)
 tk.Radiobutton(win, text="Импульсный", variable=mode, command=impulse, value=2).grid(row=4, column=0)
-tk.Radiobutton(win, text="Моноимпульсный", variable=mode, command=monoimpulse, value=3).grid(row=5, column=0)
 
 tk.Radiobutton(win, text="Да", variable=is_long_lambda, value=True).grid(row=3, column=1)
 tk.Radiobutton(win, text="Нет", variable=is_long_lambda, value=False).grid(row=4, column=1)

@@ -484,6 +484,7 @@ def impulse():
 # Окно
 win = tk.Tk()
 win.geometry("1200x750+170+20")
+# win.attributes("-fullscreen", True)
 win.resizable(False, False)
 win.title("Laser Desktop_v2")
 
@@ -493,7 +494,7 @@ win.iconphoto(False, image)
 tk.Label(win, text="Программа для расчета ПДУ отраженного лазерного излучения",
          font=("Times New Roman", 16, 'bold'),
          justify=tk.CENTER,
-         padx=55) \
+         padx=260) \
     .grid(row=0, column=0, columnspan=2, sticky="we")
 
 win.grid_rowconfigure(0, minsize=70)
@@ -526,7 +527,14 @@ tk.Radiobutton(win, text="Да", variable=is_long_lambda, value=True).grid(row=3
 tk.Radiobutton(win, text="Нет", variable=is_long_lambda, value=False).grid(row=4, column=1)
 
 # Поля ввода
-# Длина волны
+measure_values = tk.Label(win,
+                          text="Введите параметры лазера:",
+                          font=("Times New Roman", 15),
+                          justify=tk.CENTER,
+                          padx=50,
+                          )
+measure_values.grid(row=5, column=0, sticky="w")
+
 tk.Label(win,
          text="Введите длину волны (в мкм):",
          font=("Times New Roman", 15),
@@ -592,36 +600,142 @@ tk.Label(win,
 laser_f = tk.Entry(win)
 laser_f.grid(row=15, column=0, sticky="wen", padx=50)
 
+tk.Label(win,
+         text="Введите угол наблюдения (в градусах):",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=2,
+         padx=50,
+         anchor="s"). \
+    grid(row=16, column=0, sticky="w")
+
+laser_f = tk.Entry(win)
+laser_f.grid(row=17, column=0, sticky="wen", padx=50)
+
+tk.Label(win,
+         text="Рсстояние от источника (в метрах):",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=2,
+         padx=50,
+         anchor="s"). \
+    grid(row=18, column=0, sticky="w")
+
+laser_f = tk.Entry(win)
+laser_f.grid(row=19, column=0, sticky="wen", padx=50)
+
 # Кнопки внизу
 start = tk.Button(win, text="Расчитать", command=go, width=15, bg="#00FF00")
-start.grid(row=16, column=0, pady=20, padx=50, sticky="w")
+start.grid(row=20, column=0, pady=20, padx=50, sticky="w")
 
 reset = tk.Button(win, text="Сброс", command=clear_all, width=15, bg="red")
-reset.grid(row=16, column=0, padx=50, sticky="e")
+reset.grid(row=20, column=0, padx=50, sticky="e")
+
+# Измеренные значнения
+measure_values = tk.Label(win,
+                          text="Введите измеренные значания:",
+                          font=("Times New Roman", 15),
+                          justify=tk.CENTER,
+                          padx=50,
+                          )
+measure_values.grid(row=5, column=1, sticky="w")
+
+tk.Label(win,
+         text="- фоновое значение:",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=1,
+         padx=50,
+         anchor="s"
+         ). \
+    grid(row=6, column=1, sticky="w")
+
+background_laser_value = tk.Entry(win)
+background_laser_value.grid(row=7, column=1, sticky="wen", padx=50)
+
+tk.Label(win,
+         text="- измеренное значение:",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=1,
+         padx=50,
+         anchor="s"
+         ). \
+    grid(row=8, column=1, sticky="w")
+measure_laser_value = tk.Entry(win)
+measure_laser_value.grid(row=9, column=1, sticky="wen", padx=50)
+
+
+tk.Label(win,
+         text="- разность:",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=1,
+         padx=50,
+         anchor="s"
+         ). \
+    grid(row=10, column=1, sticky="w")
+measure_laser_value = tk.Entry(win)
+measure_laser_value.grid(row=11, column=1, sticky="wen", padx=50)
 
 # Поля вывода
+
+
 tk.Label(win,
-         text="ПДУ для кожи (Дж/см2):",
+         text="Результаты:",
          font=("Times New Roman", 15),
          justify=tk.CENTER,
-         height=2,
+         height=1,
          padx=50,
          anchor="s"). \
-    grid(row=8, column=1, sticky="w")
+    grid(row=12, column=1, sticky="w")
+
+tk.Label(win,
+         text="Рассчитаное значение для кожи:",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=1,
+         padx=50,
+         anchor="s"). \
+    grid(row=13, column=1, sticky="w")
 
 skin = tk.Entry(win)
-skin.grid(row=9, column=1, sticky="wen", padx=50)
+skin.grid(row=14, column=1, sticky="wen", padx=50)
 
 tk.Label(win,
-         text="ПДУ для глаз (Дж/см2):",
+         text="Рассчитаное значение для глаз:",
          font=("Times New Roman", 15),
          justify=tk.CENTER,
-         height=2,
+         height=1,
          padx=50,
          anchor="s"). \
-    grid(row=10, column=1, sticky="w")
+    grid(row=15, column=1, sticky="w")
+
+skin = tk.Entry(win)
+skin.grid(row=16, column=1, sticky="wen", padx=50)
+
+tk.Label(win,
+         text="ПДУ для кожи:",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=1,
+         padx=50,
+         anchor="s"). \
+    grid(row=17, column=1, sticky="w")
+
+skin = tk.Entry(win)
+skin.grid(row=18, column=1, sticky="wen", padx=50)
+
+tk.Label(win,
+         text="ПДУ для глаз:",
+         font=("Times New Roman", 15),
+         justify=tk.CENTER,
+         height=1,
+         padx=50,
+         anchor="s"). \
+    grid(row=19, column=1, sticky="w")
 
 eyes = tk.Entry(win)
-eyes.grid(row=11, column=1, sticky="wen", padx=50)
+eyes.grid(row=20, column=1, sticky="wen", padx=50)
 
 win.mainloop()

@@ -34,7 +34,7 @@ def time_verify() -> bool:
     common_verify(work_time, laser_time)
     if int(work_time) <= 0:
         laser_time.delete(0, tk.END)
-        laser_time.insert(0, f"ОШИБКА!!! Время работы не может быть 0 или меньше")
+        laser_time.insert(0, "ОШИБКА!!! Время работы не может быть 0 или меньше")
         return False
     return True
 
@@ -45,7 +45,7 @@ def diameter_verify() -> bool:
     common_verify(diameter_of_spot, laser_diameter)
     if float(diameter_of_spot) <= 0:
         laser_diameter.delete(0, tk.END)
-        laser_diameter.insert(0, f"ОШИБКА!!! Диаметр пятна не может быть 0 или меньше")
+        laser_diameter.insert(0, "ОШИБКА!!! Диаметр пятна не может быть 0 или меньше")
         return False
     return True
 
@@ -56,7 +56,7 @@ def impulse_duration_verify() -> bool:
     common_verify(impulse_duration, laser_tay)
     if float(impulse_duration) <= 0:
         laser_tay.delete(0, tk.END)
-        laser_tay.insert(0, f"ОШИБКА!!! Длительность импульса не может быть 0 или меньше")
+        laser_tay.insert(0, "ОШИБКА!!! Длительность импульса не может быть 0 или меньше")
         return False
     return True
 
@@ -67,7 +67,7 @@ def frequency_verify() -> bool:
     common_verify(frequency, laser_f)
     if float(frequency) <= 0:
         laser_f.delete(0, tk.END)
-        laser_f.insert(0, f"ОШИБКА!!! Частота не может быть 0 или меньше")
+        laser_f.insert(0, "ОШИБКА!!! Частота не может быть 0 или меньше")
         return False
     return True
 
@@ -78,7 +78,7 @@ def angel_verify() -> bool:
     common_verify(angel, viewing_angel)
     if 0 >= float(angel) > 180:
         viewing_angel.delete(0, tk.END)
-        viewing_angel.insert(0, f"ОШИБКА!!! Угол наблюдения должен быть в диапазоне от 0 до 180 градусов")
+        viewing_angel.insert(0, "ОШИБКА!!! Угол наблюдения должен быть в диапазоне от 0 до 180 градусов")
         return False
     return True
 
@@ -89,7 +89,7 @@ def distance_verify() -> bool:
     common_verify(distance, laser_distance)
     if float(distance) <= 0:
         laser_distance.delete(0, tk.END)
-        laser_distance.insert(0, f"ОШИБКА!!! Расстояние от источника дожно быть более 0")
+        laser_distance.insert(0, "ОШИБКА!!! Расстояние от источника дожно быть более 0")
         return False
     return True
 
@@ -102,6 +102,8 @@ def clear_all() -> None:
     laser_diameter.delete(0, tk.END)
     laser_tay.delete(0, tk.END)
     laser_f.delete(0, tk.END)
+    # viewing_angel.delete(0, tk.END)
+    # laser_distance.delete(0, tk.END)
     measure_laser_value.delete(0, tk.END)
     measure_skin.delete(0, tk.END)
     measure_eyes.delete(0, tk.END)
@@ -122,17 +124,11 @@ def crash() -> None:
 
 # ********************************** Вычисление специальных коэффициентов **********************************
 
-
-def S0_calculation() -> float | int:
-    """Вычисление коэффициента S0"""
-    diameter_of_spot = float(laser_d.get())
-    print(f" S0 = {pi * diameter_of_spot ** 2 / 4}")
-    return pi * diameter_of_spot ** 2 / 4
-
-
-def alpha_calculation(angel=45) -> float | int:
-    """Вычисление предельного угла (alpha) для 45 градусав по умолчанию"""
-    alpha = 0.04 * sqrt(S0_calculation() * cos(radians(angel)) / pi)
+def alpha_calculation(diam: int | float, ang: int | float, dist: int | float) -> float | int:
+    """Вычисление предельного угла (alpha)"""
+    print(f"1 слогаемое = {diam / 100 / dist}")
+    print(f"2 слогаемое = {sqrt(cos(radians(ang)))}")
+    alpha = diam / 100 / dist * sqrt(cos(radians(ang)))
     print(f"alpha = {alpha}")
     return alpha
 
@@ -327,15 +323,15 @@ def table_7(len_w: float, t: float) -> float | int:
         crash()
 
 
-# ********************************** НЕПРЕРЫВНЫЙ **********************************
+# ********************************** НЕПРЕРЫВНЫЙ 2 СПЕКТРАЛЬНЫЙ ДИАПАЗОН **********************************
 
 # ********************************** Кожа
 
 def continuous_calculation_skin() -> None:
     """Расчитывает ПДУ для кожи непрерывного лазера и заполняет виджет ответа ПДУ для кожи"""
     length_of_wave = float(laser_lambda.get())
-    work_time = float(laser_t.get())
-    pdu_skin: float = table_6(length_of_wave, work_time) / 10 * 1e-4 * work_time
+    work_time = float(laser_time.get())
+    pdu_skin: float = table_6(length_of_wave, work_time) / 10
     print(f"ПДУ для кожи непр лазера = {pdu_skin}")
     skin.insert(0, str(pdu_skin))
 
@@ -345,10 +341,13 @@ def continuous_calculation_skin() -> None:
 def continuous_calculation_eyes() -> None:
     """Расчитывает ПДУ для глаз непрерывного лазера и заполняет виджет ответа ПДУ для глаз"""
     length_of_wave = float(laser_lambda.get())
-    work_time = float(laser_t.get())
-    pdu_eyes: float = table_4(length_of_wave, work_time) / 10 * table_5(work_time,
-                                                                        alpha_calculation()) / 0.4 * work_time
-    print(f"B для непр {table_5(work_time, alpha_calculation())}")
+    work_time = float(laser_time.get())
+    diameter_spot = float(laser_diameter.get())
+    angel = float(viewing_angel.get()) / 100
+    distance = float(laser_distance.get())
+    b = table_5(work_time, alpha_calculation(diameter_spot, angel, distance))
+    pdu_eyes: float = table_4(length_of_wave, work_time) / 10 * b
+    print(f"Коэф B = {b}")
     print(f"ПДУ для глаз непр лазера = {pdu_eyes}")
     eyes.insert(0, str(pdu_eyes))
 
@@ -505,7 +504,7 @@ def impulse():
 
 # ОКНО
 win = tk.Tk()
-win.geometry("972x550+170+20")
+win.geometry("1200x600+170+20")
 # win.attributes("-fullscreen", True)
 win.resizable(False, False)
 win.title("Laser Desktop_v2")
@@ -652,7 +651,7 @@ tk.Radiobutton(win,
 
 # Выбор спектрального диапазона
 spectral_range = tk.Label(win,
-                          text="Выберите спектральный диапазон лазера:",
+                          text="Выберите спектральный диапазон лазера:      ",
                           font=("Times New Roman", 16, "bold"),
                           )
 spectral_range.grid(row=5, column=2, sticky="we", columnspan=2)

@@ -21,31 +21,31 @@ def lambda_verify() -> bool:
     """Верификафия длины волны"""
     length_of_wave = laser_lambda.get()
     common_verify(length_of_wave, laser_lambda)
-    if float(length_of_wave) < 0.405 or float(length_of_wave) > 100:
+    if float(length_of_wave) < 0.38 or float(length_of_wave) > 100:
         laser_lambda.delete(0, tk.END)
-        laser_lambda.insert(0, f"ОШИБКА!!! Длина волны в диапазоне 0.405 - 100 мкм")
+        laser_lambda.insert(0, f"ОШИБКА!!! Длина волны в диапазоне 0.38 - 100 мкм")
         return False
     return True
 
 
 def time_verify() -> bool:
     """Верификафия времени работы"""
-    work_time = laser_t.get()
-    common_verify(work_time, laser_t)
+    work_time = laser_time.get()
+    common_verify(work_time, laser_time)
     if int(work_time) <= 0:
-        laser_t.delete(0, tk.END)
-        laser_t.insert(0, f"ОШИБКА!!! Время работы не может быть 0 или меньше")
+        laser_time.delete(0, tk.END)
+        laser_time.insert(0, f"ОШИБКА!!! Время работы не может быть 0 или меньше")
         return False
     return True
 
 
 def diameter_verify() -> bool:
     """Верификафия диаметра пятна"""
-    diameter_of_spot = laser_d.get()
-    common_verify(diameter_of_spot, laser_d)
+    diameter_of_spot = laser_diameter.get()
+    common_verify(diameter_of_spot, laser_diameter)
     if float(diameter_of_spot) <= 0:
-        laser_d.delete(0, tk.END)
-        laser_d.insert(0, f"ОШИБКА!!! Диаметр пятна не может быть 0 или меньше")
+        laser_diameter.delete(0, tk.END)
+        laser_diameter.insert(0, f"ОШИБКА!!! Диаметр пятна не может быть 0 или меньше")
         return False
     return True
 
@@ -72,12 +72,24 @@ def frequency_verify() -> bool:
     return True
 
 
-def long_wave_verify() -> bool:
-    length_of_wave = laser_lambda.get()
-    if float(length_of_wave) < 1.4:
-        laser_lambda.delete(0, tk.END)
-        laser_lambda.insert(0, "ОШИБКА!!! ПЕРЕКЛЮЧИТЕ УКАЗАТЕЛЬ БОЛЕЕ 1,4 мкм")
-        crash()
+def angel_verify() -> bool:
+    """Верификафия угла наблюдения"""
+    angel = viewing_angel.get()
+    common_verify(angel, viewing_angel)
+    if 0 >= float(angel) > 180:
+        viewing_angel.delete(0, tk.END)
+        viewing_angel.insert(0, f"ОШИБКА!!! Угол наблюдения должен быть в диапазоне от 0 до 180 градусов")
+        return False
+    return True
+
+
+def distance_verify() -> bool:
+    """Верификафия расстояния отисточника"""
+    distance = laser_distance.get()
+    common_verify(distance, laser_distance)
+    if float(distance) <= 0:
+        laser_distance.delete(0, tk.END)
+        laser_distance.insert(0, f"ОШИБКА!!! Расстояние от источника дожно быть более 0")
         return False
     return True
 
@@ -91,6 +103,8 @@ def clear_all() -> None:
     laser_tay.delete(0, tk.END)
     laser_f.delete(0, tk.END)
     measure_laser_value.delete(0, tk.END)
+    measure_skin.delete(0, tk.END)
+    measure_eyes.delete(0, tk.END)
 
 
 # **********************************Error**********************************
@@ -98,8 +112,12 @@ def crash() -> None:
     """Заполняет поля результатов расчета сообщением о ошибке"""
     skin.delete(0, tk.END)
     eyes.delete(0, tk.END)
+    measure_skin.delete(0, tk.END)
+    measure_eyes.delete(0, tk.END)
     skin.insert(0, "Невозможно рассчитать ПДУ для кожи!!!")
     eyes.insert(0, "Невозможно рассчитать ПДУ для глаз!!!")
+    measure_skin.insert(0, "---")
+    measure_eyes.insert(0, "---")
 
 
 # ********************************** Вычисление специальных коэффициентов **********************************
@@ -277,6 +295,9 @@ def table_6(len_w: float, t: float) -> float | int:
         elif t > 100:
             return 5e2
 
+
+def table_7(len_w: float, t: float) -> float | int:
+    """ТАБЛИЦА 7"""
     if 1.4 < len_w <= 1.8:
         if 1e-10 < t <= 1:
             return 2e4 * t ** (1 / 5)
@@ -442,31 +463,33 @@ def long_wave_impulse_calculation():
 def go():
     skin.delete(0, tk.END)
     eyes.delete(0, tk.END)
+    measure_skin.delete(0, tk.END)
+    measure_skin.delete(0, tk.END)
     work_mode: int = mode.get()
-    long_wave_laser: bool = is_long_lambda.get()
-    if work_mode == 1 and not long_wave_laser:
+    specter_values: int = sp_range.get()
+    if work_mode == 1 and specter_values == 2:
         if all([lambda_verify(), time_verify(), diameter_verify()]):
             continuous_calculation_skin()
             continuous_calculation_eyes()
         else:
             crash()
-    elif work_mode == 2 and not long_wave_laser:
-        if all([lambda_verify(), time_verify(), diameter_verify(), impulse_duration_verify(), frequency_verify()]):
-            impulse_calculation_skin()
-            impulse_calculation_eyes()
-        else:
-            crash()
-    elif work_mode == 1 and long_wave_laser:
-        if all([lambda_verify(), time_verify(), diameter_verify(), long_wave_verify()]):
-            long_wave_continuous_calculation()
-        else:
-            crash()
-    elif work_mode == 2 and long_wave_laser:
-        if all([lambda_verify(), time_verify(), diameter_verify(), impulse_duration_verify(), frequency_verify(),
-                long_wave_verify()]):
-            long_wave_impulse_calculation()
-        else:
-            crash()
+    # elif work_mode == 2 and not long_wave_laser:
+    #     if all([lambda_verify(), time_verify(), diameter_verify(), impulse_duration_verify(), frequency_verify()]):
+    #         impulse_calculation_skin()
+    #         impulse_calculation_eyes()
+    #     else:
+    #         crash()
+    # elif work_mode == 1 and long_wave_laser:
+    #     if all([lambda_verify(), time_verify(), diameter_verify(), long_wave_verify()]):
+    #         long_wave_continuous_calculation()
+    #     else:
+    #         crash()
+    # elif work_mode == 2 and long_wave_laser:
+    #     if all([lambda_verify(), time_verify(), diameter_verify(), impulse_duration_verify(), frequency_verify(),
+    #             long_wave_verify()]):
+    #         long_wave_impulse_calculation()
+    #     else:
+    #         crash()
 
 
 # Функции выбора режима работы
@@ -648,6 +671,7 @@ tk.Radiobutton(win,
                value=3
                ).grid(row=7, column=2, columnspan=2)
 
+# **********************************Результаты**********************************
 tk.Label(win,
          text="Результаты расчета:",
          font=("Times New Roman", 16, "bold"),
@@ -658,24 +682,24 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=9, column=2, sticky="w")
 #
-skin = tk.Entry(win)
-skin.grid(row=9, column=3, sticky="we")
+measure_skin = tk.Entry(win)
+measure_skin.grid(row=9, column=3, sticky="we")
 
 tk.Label(win,
          text="- рассчитаное значение для глаз:",
          font=("Times New Roman", 15),
          ).grid(row=10, column=2, sticky="w")
 
-eyes = tk.Entry(win)
-eyes.grid(row=10, column=3, sticky="we")
+measure_eyes = tk.Entry(win)
+measure_eyes.grid(row=10, column=3, sticky="we")
 
 tk.Label(win,
          text="- ПДУ для кожи:",
          font=("Times New Roman", 15),
          ).grid(row=11, column=2, sticky="w")
 
-eyes = tk.Entry(win)
-eyes.grid(row=11, column=3, sticky="we")
+skin = tk.Entry(win)
+skin.grid(row=11, column=3, sticky="we")
 
 tk.Label(win,
          text="- ПДУ для глаз:",
@@ -684,41 +708,5 @@ tk.Label(win,
 
 eyes = tk.Entry(win)
 eyes.grid(row=12, column=3, sticky="we")
-#
-# tk.Label(win,
-#          text="Рассчитаное значение для глаз:",
-#          font=("Times New Roman", 15),
-#          justify=tk.CENTER,
-#          height=1,
-#          padx=50,
-#          anchor="s"). \
-#     grid(row=15, column=1, sticky="w")
-#
-# skin = tk.Entry(win)
-# skin.grid(row=16, column=1, sticky="wen", padx=50)
-#
-# tk.Label(win,
-#          text="ПДУ для кожи:",
-#          font=("Times New Roman", 15),
-#          justify=tk.CENTER,
-#          height=1,
-#          padx=50,
-#          anchor="s"). \
-#     grid(row=17, column=1, sticky="w")
-#
-# skin = tk.Entry(win)
-# skin.grid(row=18, column=1, sticky="wen", padx=50)
-#
-# tk.Label(win,
-#          text="ПДУ для глаз:",
-#          font=("Times New Roman", 15),
-#          justify=tk.CENTER,
-#          height=1,
-#          padx=50,
-#          anchor="s"). \
-#     grid(row=19, column=1, sticky="w")
-#
-# eyes = tk.Entry(win)
-# eyes.grid(row=20, column=1, sticky="wen", padx=50)
 
 win.mainloop()

@@ -102,8 +102,6 @@ def clear_all() -> None:
     laser_diameter.delete(0, tk.END)
     laser_tay.delete(0, tk.END)
     laser_f.delete(0, tk.END)
-    # viewing_angel.delete(0, tk.END)
-    # laser_distance.delete(0, tk.END)
     measure_laser_value.delete(0, tk.END)
     measure_skin.delete(0, tk.END)
     measure_eyes.delete(0, tk.END)
@@ -122,13 +120,19 @@ def crash() -> None:
     measure_eyes.insert(0, "---")
 
 
+# **********************************Вычисление разности измеренного значения и фона**********************************
+
+def work_value():
+    background = float(background_laser_value.get())
+    measure_value = float(measure_laser_value.get())
+    return measure_value - background
+
+
 # ********************************** Вычисление специальных коэффициентов **********************************
 
 def alpha_calculation(diam: int | float, ang: int | float, dist: int | float) -> float | int:
     """Вычисление предельного угла (alpha)"""
-    print(f"1 слогаемое = {diam / 100 / dist}")
-    print(f"2 слогаемое = {sqrt(cos(radians(ang)))}")
-    alpha = diam / 100 / dist * sqrt(cos(radians(ang)))
+    alpha = diam / 1000 / dist * sqrt(cos(radians(ang)))
     print(f"alpha = {alpha}")
     return alpha
 
@@ -325,9 +329,18 @@ def table_7(len_w: float, t: float) -> float | int:
 
 # ********************************** НЕПРЕРЫВНЫЙ 2 СПЕКТРАЛЬНЫЙ ДИАПАЗОН **********************************
 
-# ********************************** Кожа
+# ********************************** Кожа, расчитаное значение
 
-def continuous_calculation_skin() -> None:
+def continuous_calculated_value_skin_2nd_range() -> None:
+    """Находит рассчитаное значение для кожи непрерывного лазера 2 спектрального диапазона и заполняет виджет результат рассчитанного значения для кожи"""
+    skin_measure_value = work_value() * 1e4
+    print(f"Рассч. знач. для кожи непр. лазера 2 диап. = {skin_measure_value}")
+    measure_skin.insert(0, str(skin_measure_value) + " Вт/м2")
+
+
+# ********************************** Кожа ПДУ
+
+def continuous_calculation_skin_pdu_2nd_range() -> None:
     """Расчитывает ПДУ для кожи непрерывного лазера и заполняет виджет ответа ПДУ для кожи"""
     length_of_wave = float(laser_lambda.get())
     work_time = float(laser_time.get())
@@ -335,15 +348,22 @@ def continuous_calculation_skin() -> None:
     print(f"ПДУ для кожи непр лазера = {pdu_skin}")
     skin.insert(0, str(pdu_skin))
 
+# ********************************** Глаза, расчитаное значение
 
-# ********************************** Глаза
+def continuous_calculated_value_eyes_2nd_range() -> None:
+    """Находит рассчитаное значение для глаз непрерывного лазера 2 спектрального диапазона и заполняет виджет результат рассчитанного значения для глаз"""
+    eyes_measure_value = work_value() * 1e4 * 3.85e-5
+    print(f"Рассч. знач. для глаз непр. лазера 2 диап. = {eyes_measure_value}")
+    measure_eyes.insert(0, str(eyes_measure_value) + " Вт")
 
-def continuous_calculation_eyes() -> None:
+# ********************************** Глаза ПДУ
+
+def continuous_calculation_eyes_pdu_2nd_range() -> None:
     """Расчитывает ПДУ для глаз непрерывного лазера и заполняет виджет ответа ПДУ для глаз"""
     length_of_wave = float(laser_lambda.get())
     work_time = float(laser_time.get())
     diameter_spot = float(laser_diameter.get())
-    angel = float(viewing_angel.get()) / 100
+    angel = float(viewing_angel.get()) / 1000
     distance = float(laser_distance.get())
     b = table_5(work_time, alpha_calculation(diameter_spot, angel, distance))
     pdu_eyes: float = table_4(length_of_wave, work_time) / 10 * b
@@ -468,8 +488,10 @@ def go():
     specter_values: int = sp_range.get()
     if work_mode == 1 and specter_values == 2:
         if all([lambda_verify(), time_verify(), diameter_verify()]):
-            continuous_calculation_skin()
-            continuous_calculation_eyes()
+            continuous_calculated_value_skin_2nd_range()
+            continuous_calculated_value_eyes_2nd_range()
+            continuous_calculation_skin_pdu_2nd_range()
+            continuous_calculation_eyes_pdu_2nd_range()
         else:
             crash()
     # elif work_mode == 2 and not long_wave_laser:
@@ -570,7 +592,7 @@ laser_time.grid(row=7, column=1, sticky="we")
 
 # Диаметр пятна
 tk.Label(win,
-         text="- диаметр пятна (см):",
+         text="- диаметр пятна (мм):",
          font=("Times New Roman", 15),
          ).grid(row=8, column=0, sticky="we")
 

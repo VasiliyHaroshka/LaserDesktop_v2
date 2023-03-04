@@ -1,8 +1,7 @@
 import tkinter as tk
-from math import cos, pi, sqrt, radians
+from math import cos, sqrt, radians
 
 
-# Формулы
 # **********************************Верификация входных данных**********************************
 def common_verify(value, entry) -> bool:
     """Общая верификафия"""
@@ -94,6 +93,23 @@ def distance_verify() -> bool:
     return True
 
 
+def measure_values_verify() -> bool:
+    """Верификафия измеренного значения и фонового значения"""
+    background = background_laser_value.get()
+    measure = measure_laser_value.get()
+    common_verify(background, background_laser_value)
+    common_verify(measure, measure_laser_value)
+    if float(background) < 0:
+        background_laser_value.delete(0, tk.END)
+        background_laser_value.insert(0, "0")
+        return False
+    elif float(measure) < 0:
+        measure_laser_value.delete(0, tk.END)
+        measure_laser_value.insert(0, "ОШИБКА!!! Измеренное значение должно быть больше 0")
+        return False
+    return True
+
+
 # **********************************Очистка полей**********************************
 def clear_all() -> None:
     """Очистить все поля ввода"""
@@ -102,7 +118,6 @@ def clear_all() -> None:
     laser_diameter.delete(0, tk.END)
     laser_tay.delete(0, tk.END)
     laser_f.delete(0, tk.END)
-    measure_laser_value.delete(0, tk.END)
     measure_skin.delete(0, tk.END)
     measure_eyes.delete(0, tk.END)
 
@@ -346,7 +361,8 @@ def continuous_calculation_skin_pdu_2nd_range() -> None:
     work_time = float(laser_time.get())
     pdu_skin: float = table_6(length_of_wave, work_time) / 10
     print(f"ПДУ для кожи непр лазера = {pdu_skin}")
-    skin.insert(0, str(pdu_skin))
+    skin.insert(0, str(pdu_skin) + " Вт/м2")
+
 
 # ********************************** Глаза, расчитаное значение
 
@@ -355,6 +371,7 @@ def continuous_calculated_value_eyes_2nd_range() -> None:
     eyes_measure_value = work_value() * 1e4 * 3.85e-5
     print(f"Рассч. знач. для глаз непр. лазера 2 диап. = {eyes_measure_value}")
     measure_eyes.insert(0, str(eyes_measure_value) + " Вт")
+
 
 # ********************************** Глаза ПДУ
 
@@ -369,7 +386,7 @@ def continuous_calculation_eyes_pdu_2nd_range() -> None:
     pdu_eyes: float = table_4(length_of_wave, work_time) / 10 * b
     print(f"Коэф B = {b}")
     print(f"ПДУ для глаз непр лазера = {pdu_eyes}")
-    eyes.insert(0, str(pdu_eyes))
+    eyes.insert(0, str(pdu_eyes) + " Вт")
 
 
 # ********************************** ИМПУЛЬСНЫЙ **********************************
@@ -483,11 +500,18 @@ def go():
     skin.delete(0, tk.END)
     eyes.delete(0, tk.END)
     measure_skin.delete(0, tk.END)
-    measure_skin.delete(0, tk.END)
+    measure_eyes.delete(0, tk.END)
     work_mode: int = mode.get()
     specter_values: int = sp_range.get()
     if work_mode == 1 and specter_values == 2:
-        if all([lambda_verify(), time_verify(), diameter_verify()]):
+        if all([
+            lambda_verify(),
+            time_verify(),
+            diameter_verify(),
+            angel_verify(),
+            distance_verify(),
+            measure_values_verify()
+        ]):
             continuous_calculated_value_skin_2nd_range()
             continuous_calculated_value_eyes_2nd_range()
             continuous_calculation_skin_pdu_2nd_range()
@@ -526,7 +550,7 @@ def impulse():
 
 # ОКНО
 win = tk.Tk()
-win.geometry("1200x600+170+20")
+win.geometry("1320x600+80+50")
 # win.attributes("-fullscreen", True)
 win.resizable(False, False)
 win.title("Laser Desktop_v2")
@@ -578,7 +602,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=6, column=0, sticky="we")
 
-laser_lambda = tk.Entry(win, font=("Times New Roman", 15))
+laser_lambda = tk.Entry(win, width=60)
 laser_lambda.grid(row=6, column=1, sticky="we")
 #
 # # Время работы
@@ -587,7 +611,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=7, column=0, sticky="we")
 
-laser_time = tk.Entry(win, font=("Times New Roman", 15))
+laser_time = tk.Entry(win)
 laser_time.grid(row=7, column=1, sticky="we")
 
 # Диаметр пятна
@@ -596,7 +620,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=8, column=0, sticky="we")
 
-laser_diameter = tk.Entry(win, font=("Times New Roman", 15))
+laser_diameter = tk.Entry(win)
 laser_diameter.grid(row=8, column=1, sticky="we")
 
 # Длительность импульса
@@ -605,7 +629,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=9, column=0, sticky="we")
 
-laser_tay = tk.Entry(win, font=("Times New Roman", 15))
+laser_tay = tk.Entry(win)
 laser_tay.grid(row=9, column=1, sticky="we")
 
 # Частота
@@ -614,7 +638,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=10, column=0, sticky="we")
 
-laser_f = tk.Entry(win, font=("Times New Roman", 15))
+laser_f = tk.Entry(win)
 laser_f.grid(row=10, column=1, sticky="we")
 
 # Угол наблюдения
@@ -623,7 +647,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=11, column=0, sticky="we")
 
-viewing_angel = tk.Entry(win, font=("Times New Roman", 15))
+viewing_angel = tk.Entry(win)
 viewing_angel.grid(row=11, column=1, sticky="we")
 viewing_angel.insert(0, "30")
 
@@ -633,7 +657,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=12, column=0, sticky="we")
 
-laser_distance = tk.Entry(win, font=("Times New Roman", 15))
+laser_distance = tk.Entry(win)
 laser_distance.grid(row=12, column=1, sticky="we")
 laser_distance.insert(0, "0.5")
 
@@ -654,7 +678,7 @@ working_mode = tk.Label(win,
                         font=("Times New Roman", 16, "bold"),
                         justify=tk.CENTER,
                         )
-working_mode.grid(row=2, column=2, sticky="we", columnspan=2)
+working_mode.grid(row=1, column=2, sticky="we", columnspan=2)
 
 tk.Radiobutton(win,
                text="Непрерывный",
@@ -662,35 +686,35 @@ tk.Radiobutton(win,
                variable=mode,
                command=constant,
                value=1
-               ).grid(row=3, column=2, columnspan=2)
+               ).grid(row=2, column=2, columnspan=2)
 
 tk.Radiobutton(win,
                text="Импульсный",
                font=("Times New Roman", 15),
                variable=mode, command=impulse,
                value=2
-               ).grid(row=4, column=2, columnspan=2)
+               ).grid(row=3, column=2, columnspan=2)
 
 # Выбор спектрального диапазона
 spectral_range = tk.Label(win,
                           text="Выберите спектральный диапазон лазера:      ",
                           font=("Times New Roman", 16, "bold"),
                           )
-spectral_range.grid(row=5, column=2, sticky="we", columnspan=2)
+spectral_range.grid(row=4, column=2, sticky="we", columnspan=2)
 
 tk.Radiobutton(win,
                text="от 380 до 1400 нм (вкл.)",
                font=("Times New Roman", 15),
                variable=sp_range,
                value=2
-               ).grid(row=6, column=2, columnspan=2)
+               ).grid(row=5, column=2, columnspan=2)
 
 tk.Radiobutton(win,
                text="более 1400 нм",
                variable=sp_range,
                font=("Times New Roman", 15),
                value=3
-               ).grid(row=7, column=2, columnspan=2)
+               ).grid(row=6, column=2, columnspan=2)
 
 # **********************************Результаты**********************************
 tk.Label(win,
@@ -703,7 +727,7 @@ tk.Label(win,
          font=("Times New Roman", 15),
          ).grid(row=9, column=2, sticky="w")
 #
-measure_skin = tk.Entry(win)
+measure_skin = tk.Entry(win, width=60)
 measure_skin.grid(row=9, column=3, sticky="we")
 
 tk.Label(win,

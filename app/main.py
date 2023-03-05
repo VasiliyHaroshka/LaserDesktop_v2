@@ -120,6 +120,8 @@ def clear_all() -> None:
     laser_f.delete(0, tk.END)
     measure_skin.delete(0, tk.END)
     measure_eyes.delete(0, tk.END)
+    skin.delete(0, tk.END)
+    eyes.delete(0, tk.END)
 
 
 # **********************************Error**********************************
@@ -485,43 +487,77 @@ def impulse_calculation_eyes_2nd_range():
     eyes.insert(0, str(pdu_eyes) + " Вт")
 
 
-# ********************************** БОЛЕЕ 1,4 НЕПРЕРЫВНЫЙ **********************************
+# ********************************** НЕПРЕРЫВНЫЙ 3 СПЕКТРАЛЬНЫЙ ДИАПАЗОН **********************************
 
-def long_wave_continuous_calculation() -> None:
-    """Расчитывает ПДУ для глаз и кожи непрерывного лазера большой длины волны и заполняет виджеты ответа ПДУ"""
+# ********************************** Расчитаное значение
+
+def continuous_calculated_value_eyes_and_skin_3nd_range() -> None:
+    """Находит рассчитаное значение для глаз и кожи непрерывного лазера 3 спектрального диапазона
+    и заполняет виджеты результатов рассчитанного значения для глаз и кожи"""
+    eyes_and_skin_measure_value = work_value() * 1e4
+    print(f"Рассч. знач. для глаз и кожи непр. лазера 3 диап. = {eyes_and_skin_measure_value}")
+    measure_skin.insert(0, str(eyes_and_skin_measure_value) + " Вт/м2")
+    measure_eyes.insert(0, str(eyes_and_skin_measure_value) + " Вт/м2")
+
+
+# ********************************** Глаза и Кожа ПДУ
+
+def continuous_calculation_pdu_eyes_and_skin_3nd_range() -> None:
+    """Расчитывает ПДУ для глаз и кожи непрерывного лазера и заполняет виджет ответа ПДУ для глаз и кожи"""
     length_of_wave = float(laser_lambda.get())
-    work_time = float(laser_t.get())
-    pdu: float = table_6(length_of_wave, work_time) / 5 * 1e-4 * work_time
-    print(f"ПДУ для глаз и кожи непр лазера большой длины волны = {pdu}")
-    skin.insert(0, str(pdu))
-    eyes.insert(0, str(pdu))
+    work_time = float(laser_time.get())
+    pdu_eyes_and_skin: float = table_7(length_of_wave, work_time) / 5
+    print(f"ПДУ для глаз и кожи непр лазера = {pdu_eyes_and_skin}")
+    skin.insert(0, str(pdu_eyes_and_skin) + " Вт/м2")
+    eyes.insert(0, str(pdu_eyes_and_skin) + " Вт/м2")
 
 
-# ********************************** БОЛЕЕ 1,4 ИМПУЛЬСНЫЙ **********************************
-def long_wave_serial_impulse():
-    """Расчет ПДУ имп лазера большой длины для серии импульсов"""
+# ********************************** ИМПУЛЬСНЫЙ 3 СПЕКТРАЛЬНЫЙ ДИАПАЗОН **********************************
+
+# ********************************** Расчитаное значение
+
+def impulse_calculated_value_eyes_and_skin_3nd_range() -> None:
+    """Находит рассчитаное значение для глаз и кожи импульсного лазера 3 спектрального диапазона
+    и заполняет виджеты результатов рассчитанного значения для глаз и кожи"""
+    work_time = float(laser_time.get())
+    eyes_and_skin_measure_value = work_value() * 1e4 / work_time
+    print(f"Рассч. знач. для глаз и кожи имп. лазера 3 диап. = {eyes_and_skin_measure_value}")
+    measure_skin.insert(0, str(eyes_and_skin_measure_value) + " Вт/м2")
+    measure_eyes.insert(0, str(eyes_and_skin_measure_value) + " Вт/м2")
+
+
+# ********************************** Глаза и Кожа ПДУ для серии испульсов
+
+def serial_impulse_calculation_pdu_eyes_and_skin_3nd_range() -> float:
+    """Расчитывает ПДУ для глаз и кожи импульстного лазера для серии импульсов"""
     length_of_wave = float(laser_lambda.get())
-    work_time = float(laser_t.get())
-    h1: float = table_6(length_of_wave, work_time) / 5 * 1e-4 * work_time
-    print(f"H1 для глаз и кожи непр лазера большой длины волны = {h1}")
-    return h1
+    work_time = float(laser_time.get())
+    pdu_serial_eyes_and_skin: float = table_7(length_of_wave, work_time)
+    print(f"ПДУ для глаз и кожи непр лазера для серии имп. = {pdu_serial_eyes_and_skin}")
+    return pdu_serial_eyes_and_skin
 
 
-def long_wave_single_impulse():
-    """Расчет ПДУ имп лазера большой длины для одиночного импульса"""
+# ********************************** Глаза и Кожа ПДУ для одиночного испульса
+
+def single_impulse_calculation_pdu_eyes_and_skin_3nd_range() -> float:
+    """Расчитывает ПДУ для глаз и кожи импульстного лазера для единичного импульса"""
     length_of_wave = float(laser_lambda.get())
-    impulse_duration = float(laser_tay.get())
+    work_time = float(laser_time.get())
+    duration = float(laser_tay.get())
     frequency = float(laser_f.get())
-    work_time = float(laser_t.get())
-    h2: float = table_6(length_of_wave, impulse_duration) / 5 * 1e-4 * sqrt(w_calculation(frequency, work_time))
-    print(f"H2 для глаз и кожи непр лазера большой длины волны = {h2}")
-    return h2
+    pdu_single_eyes_and_skin: float = table_7(length_of_wave, duration) * sqrt(n_calculation(frequency, work_time))
+    print(f"ПДУ для глаз и кожи непр лазера для один. имп. = {pdu_single_eyes_and_skin}")
+    return pdu_single_eyes_and_skin
 
 
-def long_wave_impulse_calculation():
-    """Расчитывает ПДУ для глаз и кожи непрерывного лазера большой длины волны и заполняет виджеты ответа ПДУ"""
-    skin.insert(0, str(min(long_wave_serial_impulse(), long_wave_single_impulse())))
-    eyes.insert(0, str(min(long_wave_serial_impulse(), long_wave_single_impulse())))
+def impulse_pdu_calculation_eyes_and_skin_3nd_range():
+    """Сравнивает ПДУ имп лазера для серии импульсов и одиночного импульса третьего спектрального диапазона
+    и выбирает наимельший.
+    Заполняет ПДУ для кожи и глаз"""
+    pdu_eyes_and_skin = min(serial_impulse_calculation_pdu_eyes_and_skin_3nd_range(),
+                            single_impulse_calculation_pdu_eyes_and_skin_3nd_range()) / 5
+    skin.insert(0, str(pdu_eyes_and_skin) + " Вт")
+    eyes.insert(0, str(pdu_eyes_and_skin) + " Вт")
 
 
 # ********************************** MAIN **********************************
@@ -532,6 +568,7 @@ def go():
     measure_eyes.delete(0, tk.END)
     work_mode: int = mode.get()
     specter_values: int = sp_range.get()
+
     if work_mode == 1 and specter_values == 2:
         if all([
             lambda_verify(),
@@ -547,6 +584,7 @@ def go():
             continuous_calculation_eyes_pdu_2nd_range()
         else:
             crash()
+
     elif work_mode == 2 and specter_values == 2:
         if all([
             lambda_verify(),
@@ -564,17 +602,33 @@ def go():
             impulse_calculation_eyes_2nd_range()
         else:
             crash()
-    # elif work_mode == 1 and specter_values == 2:
-    #     if all([lambda_verify(), time_verify(), diameter_verify(), long_wave_verify()]):
-    #         long_wave_continuous_calculation()
-    #     else:
-    #         crash()
-    # elif work_mode == 2 and long_wave_laser:
-    #     if all([lambda_verify(), time_verify(), diameter_verify(), impulse_duration_verify(), frequency_verify(),
-    #             long_wave_verify()]):
-    #         long_wave_impulse_calculation()
-    #     else:
-    #         crash()
+
+    elif work_mode == 1 and specter_values == 3:
+        if all([
+            lambda_verify(),
+            time_verify(),
+            measure_values_verify()
+        ]):
+            continuous_calculated_value_eyes_and_skin_3nd_range()
+            continuous_calculation_pdu_eyes_and_skin_3nd_range()
+        else:
+            crash()
+
+    elif work_mode == 2 and specter_values == 3:
+        if all([
+            lambda_verify(),
+            time_verify(),
+            diameter_verify(),
+            impulse_duration_verify(),
+            frequency_verify(),
+            angel_verify(),
+            distance_verify(),
+            measure_values_verify()
+        ]):
+            impulse_calculated_value_eyes_and_skin_3nd_range()
+            impulse_pdu_calculation_eyes_and_skin_3nd_range()
+        else:
+            crash()
 
 
 # Функции выбора режима работы

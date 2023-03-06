@@ -143,7 +143,8 @@ def work_value() -> float:
     """Вычисление разности измеренного уровня и фонового уровня"""
     background = float(background_laser_value.get())
     measure_value = float(measure_laser_value.get())
-    return measure_value - background
+    difference = measure_value - background
+    return difference
 
 
 # ********************************** Вычисление специальных коэффициентов **********************************
@@ -362,7 +363,6 @@ def continuous_calculation_skin_pdu_2nd_range() -> None:
     length_of_wave = float(laser_lambda.get())
     work_time = float(laser_time.get())
     pdu_skin: float = table_6(length_of_wave, work_time) / 10
-    print(f"ПДУ для кожи непр лазера = {pdu_skin}")
     skin.insert(0, str(pdu_skin) + " Вт/м2")
 
 
@@ -613,6 +613,7 @@ def go() -> None:
             impulse_pdu_calculation_eyes_and_skin_3nd_range()
         else:
             crash()
+
 
 # ********************************** Выбор режима работы
 def constant() -> None:
